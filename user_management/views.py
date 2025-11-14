@@ -1,4 +1,4 @@
-from rest_framework import permissions, status, generics
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -162,7 +162,33 @@ class LoginView(APIView):
         return Response({'error': 'Invalid credentials'}, status=400)
     
     
-    
+
+class UserLogoutView(APIView):
+   
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+
+        if refresh_token is None:
+            return Response(
+                {"detail": "Refresh token is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except TokenError:
+            return Response(
+                {"detail": "Invalid refresh token"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {"detail": "Logout successful"},
+            status=status.HTTP_205_RESET_CONTENT
+        )
 
 class AdminLoginView(APIView):
     def post(self, request):
@@ -224,3 +250,5 @@ class AdminLogoutView(APIView):
             {"detail": "Logout successful"},
             status=status.HTTP_205_RESET_CONTENT
         )
+
+

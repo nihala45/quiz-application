@@ -1,4 +1,3 @@
-# serializers.py
 from rest_framework import serializers
 from .models import Category, Quiz, Question
 from .models import QuizAttempt, UserAnswer
