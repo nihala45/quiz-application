@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     'corsheaders',
-    'user_management'
+    'user_management',
+    'quiz'
 ]
 
 REST_FRAMEWORK = {

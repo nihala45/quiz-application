@@ -12,6 +12,8 @@ from .serializers import UserSerializer
 import random
 from django.contrib.auth.hashers import make_password
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework_simplejwt.exceptions import TokenError
+
 
 
 
@@ -33,6 +35,7 @@ class UserRegisterView(APIView):
 
         if Users.objects.filter(email=email, is_email_verified=True).exists():
             return Response(
+                
                 {"email": "This email is already verified and registered."},
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -158,3 +161,66 @@ class LoginView(APIView):
 
         return Response({'error': 'Invalid credentials'}, status=400)
     
+    
+    
+
+class AdminLoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        try:
+            user = Users.objects.get(email=email)
+        except Users.DoesNotExist:
+           
+            return Response(
+                {'detail': 'Invalid credentials or not an admin'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        
+
+        if user.check_password(password) and user.is_superuser:
+           
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'is_superuser': user.is_superuser,
+                'email': user.email,
+            })
+
+        return Response(
+            {'detail': 'Invalid credentials or not an admin'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+
+
+
+class AdminLogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+
+        if refresh_token is None:
+            return Response(
+                {"detail": "Refresh token is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()   
+        except TokenError:
+            return Response(
+                {"detail": "Invalid refresh token"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {"detail": "Logout successful"},
+            status=status.HTTP_205_RESET_CONTENT
+        )
