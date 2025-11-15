@@ -16,4 +16,3 @@ class UserSerializer(serializers.ModelSerializer):
     
     def create(self, validate_data):
         return Users.objects.create_user(**validate_data)
-   

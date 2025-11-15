@@ -19,9 +19,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 
 class UserRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
-
     def post(self, request):
-
         email = request.data.get("email", "").strip().lower()
         username = request.data.get("username", "").strip()
         phone = request.data.get("phone", "").strip()
@@ -34,8 +32,7 @@ class UserRegisterView(APIView):
             )
 
         if Users.objects.filter(email=email, is_email_verified=True).exists():
-            return Response(
-                
+            return Response( 
                 {"email": "This email is already verified and registered."},
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -121,7 +118,6 @@ class VerifyOTPView(APIView):
                     'email': user.email,
                     'is_superuser': user.is_superuser,
                 }, status=status.HTTP_200_OK)
-
             else:
                 return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -250,5 +246,3 @@ class AdminLogoutView(APIView):
             {"detail": "Logout successful"},
             status=status.HTTP_205_RESET_CONTENT
         )
-
-
